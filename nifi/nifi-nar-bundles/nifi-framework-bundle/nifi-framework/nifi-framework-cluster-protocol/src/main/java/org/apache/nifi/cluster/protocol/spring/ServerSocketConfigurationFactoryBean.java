@@ -35,13 +35,14 @@ public class ServerSocketConfigurationFactoryBean implements FactoryBean<ServerS
     @Override
     public ServerSocketConfiguration getObject() throws Exception {
         if(configuration == null) {
-            configuration = new ServerSocketConfiguration();
-            configuration.setNeedClientAuth(properties.getNeedClientAuth());
-            
+            final boolean isClusterSecure = Boolean.valueOf(properties.getProperty(NiFiProperties.CLUSTER_PROTOCOL_IS_SECURE));
             final int timeout = (int) FormatUtils.getTimeDuration(properties.getClusterProtocolSocketTimeout(), TimeUnit.MILLISECONDS);
+            
+            configuration = new ServerSocketConfiguration();
             configuration.setSocketTimeout(timeout);
             configuration.setReuseAddress(true);
-            if(Boolean.valueOf(properties.getProperty(NiFiProperties.CLUSTER_PROTOCOL_IS_SECURE))) {
+            configuration.setNeedClientAuth(isClusterSecure);
+            if(isClusterSecure) {
                 configuration.setSSLContextFactory(new SSLContextFactory(properties));
             }
         }

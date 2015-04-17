@@ -289,6 +289,7 @@
 		<nifi.security.truststoreType />
 		<nifi.security.truststorePasswd />
 		<nifi.security.needClientAuth />
+        <nifi.security.wantClientAuth />
 		<nifi.security.authorizedUsers.file>./conf/authorized-users.xml</nifi.security.authorizedUsers.file>
 		<nifi.security.user.credential.cache.duration>24 hours</nifi.security.user.credential.cache.duration>
 		<nifi.security.user.authority.provider>file-provider</nifi.security.user.authority.provider>
@@ -296,6 +297,11 @@
 		<nifi.security.support.new.account.requests />
 		<nifi.security.ocsp.responder.url />
 		<nifi.security.ocsp.responder.certificate />
+        
+        <!-- nifi.properties: anonymous access (http and one way ssl -->
+        <nifi.security.limit.anonymous.access>false</nifi.security.limit.anonymous.access>
+        <nifi.security.allow.anonymous.readonly.access>true</nifi.security.allow.anonymous.readonly.access>
+        <nifi.security.allow.anonymous.provenance.access>true</nifi.security.allow.anonymous.provenance.access>
 
 		<!-- nifi.properties: cluster common properties (cluster manager and nodes 
 			must have same values) -->

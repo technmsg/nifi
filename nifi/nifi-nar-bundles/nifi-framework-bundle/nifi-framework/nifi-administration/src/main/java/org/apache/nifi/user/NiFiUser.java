@@ -29,7 +29,13 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class NiFiUser implements Serializable {
 
+    // DN for the anonymous user that is used during http and one way ssl - this
+    // anonymous user has full permission
     public static final String ANONYMOUS_USER_DN = "anonymous";
+    
+    // DN for the anonymous user that is when the application is configured for
+    // limited anonymous access
+    public static final String LIMITED_ANONYMOUS_USER_DN = "limited-anonymous";
 
     private String id;
     private String dn;

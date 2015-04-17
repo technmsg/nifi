@@ -91,7 +91,7 @@ public class StandardUserDAO implements UserDAO {
             + "FROM USER U "
             + "LEFT JOIN AUTHORITY A " // ensures that users without authorities are still matched
             + "ON U.ID = A.USER_ID "
-            + "WHERE U.DN <> ?";
+            + "WHERE U.DN NOT IN (?, ?)";
 
     private static final String SELECT_USER_GROUPS = "SELECT DISTINCT "
             + "U.USER_GROUP "
@@ -111,7 +111,7 @@ public class StandardUserDAO implements UserDAO {
             + "FROM USER U "
             + "LEFT JOIN AUTHORITY A " // ensures that users without authorities are still matched
             + "ON U.ID = A.USER_ID "
-            + "WHERE U.DN <> ? AND U.USER_GROUP = ?";
+            + "WHERE U.DN NOT IN (?, ?) AND U.USER_GROUP = ?";
 
     private static final String INSERT_USER = "INSERT INTO USER ("
             + "ID, DN, USER_NAME, USER_GROUP, CREATION, LAST_VERIFIED, JUSTIFICATION, STATUS"
@@ -195,6 +195,7 @@ public class StandardUserDAO implements UserDAO {
             // create the connection and obtain a statement
             statement = connection.prepareStatement(SELECT_USERS);
             statement.setString(1, NiFiUser.ANONYMOUS_USER_DN);
+            statement.setString(2, NiFiUser.LIMITED_ANONYMOUS_USER_DN);
 
             // execute the query
             rs = statement.executeQuery();
@@ -288,7 +289,8 @@ public class StandardUserDAO implements UserDAO {
             // create the connection and obtain a statement
             statement = connection.prepareStatement(SELECT_USER_GROUP);
             statement.setString(1, NiFiUser.ANONYMOUS_USER_DN);
-            statement.setString(2, group);
+            statement.setString(2, NiFiUser.LIMITED_ANONYMOUS_USER_DN);
+            statement.setString(3, group);
 
             // execute the query
             rs = statement.executeQuery();

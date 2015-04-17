@@ -120,6 +120,10 @@ public class NiFiProperties extends Properties {
     public static final String SECURITY_TRUSTSTORE_TYPE = "nifi.security.truststoreType";
     public static final String SECURITY_TRUSTSTORE_PASSWD = "nifi.security.truststorePasswd";
     public static final String SECURITY_NEED_CLIENT_AUTH = "nifi.security.needClientAuth";
+    public static final String SECURITY_WANT_CLIENT_AUTH = "nifi.security.wantClientAuth";
+    public static final String SECURITY_LIMIT_ANONYMOUS_ACCESS = "nifi.security.limit.anonymous.access";
+    public static final String SECURITY_ALLOW_ANONYMOUS_READONLY_ACCESS = "nifi.security.allow.anonymous.readonly.access";
+    public static final String SECURITY_ALLOW_ANONYMOUS_PROVENANCE_ACCESS = "nifi.security.allow.anonymous.provenance.access";
     public static final String SECURITY_USER_AUTHORITY_PROVIDER = "nifi.security.user.authority.provider";
     public static final String SECURITY_CLUSTER_AUTHORITY_PROVIDER_PORT = "nifi.security.cluster.authority.provider.port";
     public static final String SECURITY_CLUSTER_AUTHORITY_PROVIDER_THREADS = "nifi.security.cluster.authority.provider.threads";
@@ -468,7 +472,64 @@ public class NiFiProperties extends Properties {
         }
         return needClientAuth;
     }
-
+    
+    /**
+     * Will default to true unless the value is explicitly set to false.
+     *
+     * @return Whether client auth is wanted
+     */
+    public boolean getWantClientAuth() {
+        boolean wantClientAuth = true;
+        String rawWantClientAuth = getProperty(SECURITY_WANT_CLIENT_AUTH);
+        if ("false".equalsIgnoreCase(rawWantClientAuth)) {
+            wantClientAuth = false;
+        }
+        return wantClientAuth;
+    }
+    
+    /**
+     * Returns whether anonymous access should be limited. Will default to false
+     * unless explictly set to true.
+     * 
+     * @return Whether to limit anonymous access
+     */
+    public boolean getLimitAnonymousAccess() {
+        boolean limitAnonymousAccess = false;
+        String rawlimitAnonymousAccess = getProperty(SECURITY_LIMIT_ANONYMOUS_ACCESS);
+        if ("true".equalsIgnoreCase(rawlimitAnonymousAccess)) {
+            limitAnonymousAccess = true;
+        }
+        return limitAnonymousAccess;
+    }
+    
+    /**
+     * Will default to true unless the value is explicity set to false.
+     * 
+     * @return Whether anonymous read only access is allowed
+     */
+    public boolean getAllowAnonymousReadOnlyAccess() {
+        boolean supportsReadOnlyClientAuth = true;
+        String rawSupportsReadOnlyClientAuth = getProperty(SECURITY_ALLOW_ANONYMOUS_READONLY_ACCESS);
+        if ("false".equalsIgnoreCase(rawSupportsReadOnlyClientAuth)) {
+            supportsReadOnlyClientAuth = false;
+        }
+        return supportsReadOnlyClientAuth;
+    }
+    
+    /**
+     * Will default to true unless the value is explicity set to false.
+     * 
+     * @return Whether anonymous read only access is allowed
+     */
+    public boolean getAllowAnonymousProvenanceAccess() {
+        boolean supportsReadOnlyClientAuth = true;
+        String rawSupportsReadOnlyClientAuth = getProperty(SECURITY_ALLOW_ANONYMOUS_PROVENANCE_ACCESS);
+        if ("false".equalsIgnoreCase(rawSupportsReadOnlyClientAuth)) {
+            supportsReadOnlyClientAuth = false;
+        }
+        return supportsReadOnlyClientAuth;
+    }
+    
     public String getUserCredentialCacheDuration() {
         return getProperty(SECURITY_USER_CREDENTIAL_CACHE_DURATION, DEFAULT_USER_CREDENTIAL_CACHE_DURATION);
     }

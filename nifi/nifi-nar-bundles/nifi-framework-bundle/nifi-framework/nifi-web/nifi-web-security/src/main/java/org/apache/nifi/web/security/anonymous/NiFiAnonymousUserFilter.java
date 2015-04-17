@@ -54,7 +54,14 @@ public class NiFiAnonymousUserFilter extends AnonymousAuthenticationFilter {
         Authentication authentication;
         try {
             // load the anonymous user from the database
-            NiFiUser user = userService.getUserByDn(NiFiUser.ANONYMOUS_USER_DN);
+            NiFiUser user;
+            if (properties.getLimitAnonymousAccess()) {
+                user = userService.getUserByDn(NiFiUser.LIMITED_ANONYMOUS_USER_DN);
+            } else {
+                user = userService.getUserByDn(NiFiUser.ANONYMOUS_USER_DN);
+            }
+
+            // get the user details
             NiFiUserDetails userDetails = new NiFiUserDetails(user);
 
             // get the granted authorities

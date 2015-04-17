@@ -62,6 +62,10 @@ public class UserDataSourceFactoryBean implements FactoryBean {
             + "CONSTRAINT USER_ROLE_UNIQUE_CONSTRAINT UNIQUE (USER_ID, ROLE)"
             + ")";
 
+    // --------------
+    // anonymous user
+    // --------------
+    
     private static final String INSERT_ANONYMOUS_USER = "INSERT INTO USER ("
             + "ID, DN, USER_NAME, CREATION, LAST_VERIFIED, JUSTIFICATION, STATUS"
             + ") VALUES ("
@@ -73,7 +77,7 @@ public class UserDataSourceFactoryBean implements FactoryBean {
             + "'Anonymous user needs no justification', "
             + "'ACTIVE'"
             + ")";
-
+    
     private static final String INSERT_ANONYMOUS_MONITOR_AUTHORITY = "INSERT INTO AUTHORITY ("
             + "USER_ID, ROLE"
             + ") VALUES ("
@@ -102,6 +106,10 @@ public class UserDataSourceFactoryBean implements FactoryBean {
             + "'ROLE_NIFI'"
             + ")";
 
+    // ---------------------------------
+    // anonymouse user provenance access
+    // ---------------------------------
+    
     private static final String INSERT_ANONYMOUS_PROVENANCE_AUTHORITY = "INSERT INTO AUTHORITY ("
             + "USER_ID, ROLE"
             + ") VALUES ("
@@ -114,6 +122,58 @@ public class UserDataSourceFactoryBean implements FactoryBean {
             + "USER_ID = (SELECT ID FROM USER WHERE DN = '" + NiFiUser.ANONYMOUS_USER_DN + "') "
             + "AND "
             + "ROLE = 'ROLE_PROVENANCE'";
+    
+    // ----------------------
+    // limited anonymous user
+    // ----------------------
+    
+    private static final String SELECT_LIMITED_ANONYMOUS_USER = "SELECT ID FROM USER WHERE DN = '" + NiFiUser.LIMITED_ANONYMOUS_USER_DN + "'";
+    
+    private static final String INSERT_LIMITED_ANONYMOUS_USER = "INSERT INTO USER ("
+            + "ID, DN, USER_NAME, CREATION, LAST_VERIFIED, JUSTIFICATION, STATUS"
+            + ") VALUES ("
+            + "'" + UUID.randomUUID().toString() + "', "
+            + "'" + NiFiUser.LIMITED_ANONYMOUS_USER_DN + "', "
+            + "'" + NiFiUser.LIMITED_ANONYMOUS_USER_DN + "', "
+            + "NOW(), "
+            + "NOW(), "
+            + "'Restricted anonymous user needs no justification', "
+            + "'ACTIVE'"
+            + ")";
+    
+    // ---------------------------------------
+    // limited anonymous user read only access
+    // ---------------------------------------
+    
+    private static final String SELECT_LIMITED_ANONYMOUS_MONITOR_AUTHORITY = "SELECT USER_ID FROM AUTHORITY "
+            + "WHERE USER_ID = (SELECT ID FROM USER WHERE DN = '" + NiFiUser.LIMITED_ANONYMOUS_USER_DN + "') AND ROLE = 'ROLE_MONITOR'";
+    
+    private static final String DELETE_LIMITED_ANONYMOUS_MONITOR_AUTHORITY = "DELETE FROM AUTHORITY "
+            + "WHERE USER_ID = (SELECT ID FROM USER WHERE DN = '" + NiFiUser.LIMITED_ANONYMOUS_USER_DN + "') AND ROLE = 'ROLE_MONITOR'";
+    
+    private static final String INSERT_LIMITED_ANONYMOUS_MONITOR_AUTHORITY = "INSERT INTO AUTHORITY ("
+            + "USER_ID, ROLE"
+            + ") VALUES ("
+            + "(SELECT ID FROM USER WHERE DN = '" + NiFiUser.LIMITED_ANONYMOUS_USER_DN + "'), "
+            + "'ROLE_MONITOR'"
+            + ")";
+    
+    // ----------------------------------------
+    // limited anonymous user provenance access
+    // ----------------------------------------
+    
+    private static final String SELECT_LIMITED_ANONYMOUS_PROVENANCE_AUTHORITY = "SELECT USER_ID FROM AUTHORITY "
+            + "WHERE USER_ID = (SELECT ID FROM USER WHERE DN = '" + NiFiUser.LIMITED_ANONYMOUS_USER_DN + "') AND ROLE = 'ROLE_PROVENANCE'";
+    
+    private static final String DELETE_LIMITED_ANONYMOUS_PROVENANCE_AUTHORITY = "DELETE FROM AUTHORITY "
+            + "WHERE USER_ID = (SELECT ID FROM USER WHERE DN = '" + NiFiUser.LIMITED_ANONYMOUS_USER_DN + "') AND ROLE = 'ROLE_PROVENANCE'";
+    
+    private static final String INSERT_LIMITED_ANONYMOUS_PROVENANCE_AUTHORITY = "INSERT INTO AUTHORITY ("
+            + "USER_ID, ROLE"
+            + ") VALUES ("
+            + "(SELECT ID FROM USER WHERE DN = '" + NiFiUser.LIMITED_ANONYMOUS_USER_DN + "'), "
+            + "'ROLE_PROVENANCE'"
+            + ")";
 
     private JdbcConnectionPool connectionPool;
 
@@ -168,11 +228,66 @@ public class UserDataSourceFactoryBean implements FactoryBean {
                     statement.execute(INSERT_ANONYMOUS_DFM_AUTHORITY);
                     statement.execute(INSERT_ANONYMOUS_ADMIN_AUTHORITY);
                     statement.execute(INSERT_ANONYMOUS_NIFI_AUTHORITY);
+                    
+                    // if its configured to limit anonymous
+                    if (properties.getLimitAnonymousAccess()) {
+                        // seed the restricted anonymous user
+                        statement.execute(INSERT_LIMITED_ANONYMOUS_USER);
+
+                        if (properties.getAllowAnonymousReadOnlyAccess()) {
+                            statement.execute(INSERT_LIMITED_ANONYMOUS_MONITOR_AUTHORITY);
+                        }
+                        if (properties.getAllowAnonymousProvenanceAccess()) {
+                            statement.execute(INSERT_LIMITED_ANONYMOUS_PROVENANCE_AUTHORITY);
+                        }
+                    }
                 } else {
                     logger.info("Existing database found and connected to at: " + databaseUrl);
+
+                    // if its configured to limit anonymous access
+                    if (properties.getLimitAnonymousAccess()) {
+                        
+                        // close the previous result set if necessary
+                        RepositoryUtils.closeQuietly(rs);
+
+                        // create the user if necessary
+                        rs = statement.executeQuery(SELECT_LIMITED_ANONYMOUS_USER);
+                        if (!rs.next()) {
+                            statement.execute(INSERT_LIMITED_ANONYMOUS_USER);
+
+                            // conditionally allow anonymous read only access
+                            if (properties.getAllowAnonymousReadOnlyAccess()) {
+                                statement.execute(INSERT_LIMITED_ANONYMOUS_MONITOR_AUTHORITY);
+                            }
+
+                            // conditionally allow anonymouse provenance access
+                            if (properties.getAllowAnonymousProvenanceAccess()) {
+                                statement.execute(INSERT_LIMITED_ANONYMOUS_PROVENANCE_AUTHORITY);
+                            }
+                        } else {
+                            // conditionally add/remove anonymous read only
+                            if (properties.getAllowAnonymousReadOnlyAccess()) {
+                                if (!allowsAnonymousReadOnlyAccess(statement)) {
+                                    statement.execute(INSERT_LIMITED_ANONYMOUS_MONITOR_AUTHORITY);
+                                }
+                            } else {
+                                statement.executeUpdate(DELETE_LIMITED_ANONYMOUS_MONITOR_AUTHORITY);
+                            }
+
+                            // conditionally add/remove anonymous provenance
+                            if (properties.getAllowAnonymousProvenanceAccess()) {
+                                if (!allowsAnonymousProvenanceAccess(statement)) {
+                                    statement.execute(INSERT_LIMITED_ANONYMOUS_PROVENANCE_AUTHORITY);
+                                }
+                            } else {
+                                // remove provenance access
+                                statement.execute(DELETE_LIMITED_ANONYMOUS_PROVENANCE_AUTHORITY);
+                            }
+                        }
+                    }
                 }
 
-                // close the previous result set
+                // close the previous result set if necessary
                 RepositoryUtils.closeQuietly(rs);
 
                 // merge in the provenance role to handle existing databases
@@ -196,6 +311,26 @@ public class UserDataSourceFactoryBean implements FactoryBean {
         return connectionPool;
     }
 
+    private boolean allowsAnonymousReadOnlyAccess(final Statement statement) throws SQLException {
+        ResultSet rs = null;
+        try {
+            rs = statement.executeQuery(SELECT_LIMITED_ANONYMOUS_MONITOR_AUTHORITY);
+            return rs.next();
+        } finally {
+            RepositoryUtils.closeQuietly(rs);
+        }
+    }
+    
+    private boolean allowsAnonymousProvenanceAccess(final Statement statement) throws SQLException {
+        ResultSet rs = null;
+        try {
+            rs = statement.executeQuery(SELECT_LIMITED_ANONYMOUS_PROVENANCE_AUTHORITY);
+            return rs.next();
+        } finally {
+            RepositoryUtils.closeQuietly(rs);
+        }
+    }
+    
     /**
      * Get the database url for the specified database file.
      *
