@@ -16,12 +16,15 @@
  */
 package org.apache.nifi.web.api;
 
+import com.sun.jersey.api.Responses;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 import com.wordnik.swagger.annotations.Authorization;
+import java.io.PrintWriter;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -33,12 +36,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HttpMethod;
+import static javax.ws.rs.HttpMethod.POST;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -59,9 +65,11 @@ import org.apache.nifi.web.api.entity.UserSearchResultsEntity;
 import org.apache.nifi.web.api.entity.UsersEntity;
 import org.apache.nifi.web.api.request.ClientIdParameter;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.nifi.user.NiFiUser;
 import org.apache.nifi.web.NiFiServiceFacade;
 import static org.apache.nifi.web.api.ApplicationResource.CLIENT_ID;
 import org.apache.nifi.web.api.dto.RevisionDTO;
+import org.apache.nifi.web.security.user.NiFiUserUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
@@ -83,6 +91,31 @@ public class UserResource extends ApplicationResource {
     private NiFiProperties properties;
     private NiFiServiceFacade serviceFacade;
 
+    @POST
+    @Consumes(MediaType.WILDCARD)
+    @Produces(MediaType.TEXT_PLAIN)
+    @Path("") // necessary due to a bug in swagger
+    @ApiOperation(
+            value = "Creates a user",
+            response = String.class
+    )
+    public Response createUser() {
+        if (!properties.getSupportNewAccountRequests()) {
+            return Responses.notFound().entity("This NiFi does not support new account requests.").build();
+        }
+        
+        final NiFiUser nifiUser = NiFiUserUtils.getNiFiUser();
+        if (nifiUser != null) {
+            throw new IllegalArgumentException("User account already created " + nifiUser.getDn());
+        }
+        
+        // create an account request for the current user
+        final UserDTO user = serviceFacade.createUser();
+
+        final String uri = generateResourceUri("controller", "templates", user.getId());
+        return generateCreatedResponse(URI.create(uri), "Not authorized. User account created. Authorization pending.").build();
+    }
+    
     /**
      * Gets all users that are registered within this Controller.
      *

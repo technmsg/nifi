@@ -50,6 +50,9 @@
             <li>
                 <span id="about-link" class="link">about</span>
             </li>
+            <li>
+                <span id="about-link" class="link"><a href="login">login</a></span>
+            </li>
         </ul>
     </div>
 </div>

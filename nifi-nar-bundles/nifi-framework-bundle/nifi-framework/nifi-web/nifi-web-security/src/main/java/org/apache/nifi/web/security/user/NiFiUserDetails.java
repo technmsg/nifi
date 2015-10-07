@@ -41,7 +41,7 @@ public class NiFiUserDetails implements UserDetails {
     public NiFiUserDetails(NiFiUser user) {
         this.user = user;
     }
-
+    
     /**
      * Get the user for this UserDetails.
      *
@@ -76,7 +76,6 @@ public class NiFiUserDetails implements UserDetails {
         return user.getDn();
     }
 
-    // TODO: not sure how to handle these yet
     @Override
     public boolean isAccountNonExpired() {
         return true;

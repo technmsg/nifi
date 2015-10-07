@@ -16,8 +16,6 @@
  */
 package org.apache.nifi.web.security.anonymous;
 
-import java.util.ArrayList;
-import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.nifi.admin.service.AdministrationException;
@@ -25,11 +23,10 @@ import org.apache.nifi.admin.service.UserService;
 import org.apache.nifi.user.NiFiUser;
 import org.apache.nifi.web.security.user.NiFiUserDetails;
 import org.apache.nifi.util.NiFiProperties;
+import org.apache.nifi.web.security.token.NiFiAuthorizationToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 
 /**
@@ -51,45 +48,31 @@ public class NiFiAnonymousUserFilter extends AnonymousAuthenticationFilter {
 
     @Override
     protected Authentication createAuthentication(HttpServletRequest request) {
-        Authentication authentication;
-        try {
-            // load the anonymous user from the database
-            NiFiUser user = userService.getUserByDn(NiFiUser.ANONYMOUS_USER_DN);
-            NiFiUserDetails userDetails = new NiFiUserDetails(user);
+        Authentication authentication = null;
 
-            // get the granted authorities
-            List<GrantedAuthority> authorities = new ArrayList<>(userDetails.getAuthorities());
-            authentication = new AnonymousAuthenticationToken(ANONYMOUS_KEY, userDetails, authorities);
-        } catch (AdministrationException ase) {
-            // record the issue
-            anonymousUserFilterLogger.warn("Unable to load anonymous user from accounts database: " + ase.getMessage());
-            if (anonymousUserFilterLogger.isDebugEnabled()) {
-                anonymousUserFilterLogger.warn(StringUtils.EMPTY, ase);
+        // only support anonymous when the request is non-secure or one way ssl
+//        if (!request.isSecure() || !properties.getNeedClientAuth()) {
+        if (true) {
+            try {
+                // load the anonymous user from the database
+                NiFiUser user = userService.getUserByDn(NiFiUser.ANONYMOUS_USER_DN);
+                NiFiUserDetails userDetails = new NiFiUserDetails(user);
+
+                // get the granted authorities
+                authentication = new NiFiAuthorizationToken(userDetails);
+            } catch (AdministrationException ase) {
+                // record the issue
+                anonymousUserFilterLogger.warn("Unable to load anonymous user from accounts database: " + ase.getMessage());
+                if (anonymousUserFilterLogger.isDebugEnabled()) {
+                    anonymousUserFilterLogger.warn(StringUtils.EMPTY, ase);
+                }
             }
-
-            // defer to the base implementation
-            authentication = super.createAuthentication(request);
         }
         return authentication;
     }
 
-    /**
-     * Only supports anonymous users for non-secure requests or one way ssl.
-     *
-     * @param request request
-     * @return true if allowed
-     */
-    @Override
-    protected boolean applyAnonymousForThisRequest(HttpServletRequest request) {
-        // anonymous for non secure requests
-        if ("http".equalsIgnoreCase(request.getScheme())) {
-            return true;
-        }
-
-        return !properties.getNeedClientAuth();
-    }
-
     /* setters */
+
     public void setUserService(UserService userService) {
         this.userService = userService;
     }
