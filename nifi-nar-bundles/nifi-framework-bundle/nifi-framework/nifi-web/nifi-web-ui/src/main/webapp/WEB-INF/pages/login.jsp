@@ -22,40 +22,23 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <link rel="shortcut icon" href="images/nifi16.ico"/>
         <link rel="stylesheet" href="css/reset.css" type="text/css" />
+        ${nf.login.style.tags}
+        <link rel="stylesheet" href="js/jquery/modal/jquery.modal.css?${project.version}" type="text/css" />
+        <link rel="stylesheet" href="js/jquery/qtip2/jquery.qtip.min.css?" type="text/css" />
+        <link rel="stylesheet" href="js/jquery/ui-smoothness/jquery-ui-1.10.4.min.css" type="text/css" />
         <script type="text/javascript" src="js/jquery/jquery-2.1.1.min.js"></script>
-        <script type="text/javascript" src="js/jquery/jquery.form.min.js"></script>
+        <script type="text/javascript" src="js/jquery/modal/jquery.modal.js?${project.version}"></script>
+        <script type="text/javascript" src="js/jquery/qtip2/jquery.qtip.min.js"></script>
+        <script type="text/javascript" src="js/jquery/ui-smoothness/jquery-ui-1.10.4.min.js"></script>
         <script type="text/javascript" src="js/nf/nf-namespace.js?${project.version}"></script>
-        <script type="text/javascript">
-            /* global nf */
-            
-            $(document).ready(function() {
-                nf.LogIn.init();
-            });
-            
-            nf.LogIn = (function () {
-                var initializePage = function () {
-                    return $.Deferred(function(deferred) {
-                        
-                    });
-                };
-                
-                return {
-                    /**
-                     * Initializes the login page.
-                     */
-                    init: function () {
-                        initializePage().done(function () {
-                        });
-                    }
-                };
-            }());
-        </script>
+        ${nf.login.script.tags}
     </head>
     <body>
         <form name="loginForm" action="token" method="post">
             <legend>Please Login</legend>
             <label for="username">Username</label>
             <input type="text" id="username" name="username" value="${username}"/>
+            <br>
             <label for="password">Password</label>
             <input type="password" id="password" name="password"/>
             <div class="form-actions">

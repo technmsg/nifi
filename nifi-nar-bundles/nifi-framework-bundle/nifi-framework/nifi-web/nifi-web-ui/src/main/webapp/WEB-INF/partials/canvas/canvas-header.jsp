@@ -51,7 +51,7 @@
                 <span id="about-link" class="link">about</span>
             </li>
             <li>
-                <span id="about-link" class="link"><a href="login">login</a></span>
+                <span id="login-link" class="link">login</span>
             </li>
         </ul>
     </div>
