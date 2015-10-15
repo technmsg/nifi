@@ -17,9 +17,7 @@
 package org.apache.nifi.web.security;
 
 import java.security.cert.X509Certificate;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Deque;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -40,7 +38,7 @@ public class ProxiedEntitiesUtils {
     public static final String PROXY_ENTITIES_CHAIN = "X-ProxiedEntitiesChain";
     public static final String PROXY_ENTITIES_ACCEPTED = "X-ProxiedEntitiesAccepted";
     public static final String PROXY_ENTITIES_DETAILS = "X-ProxiedEntitiesDetails";
-    
+
     private static final Pattern proxyChainPattern = Pattern.compile("<(.*?)>");
 
     /**
@@ -63,12 +61,12 @@ public class ProxiedEntitiesUtils {
 
         return xProxiedEntitiesChain;
     }
-    
+
     /**
      * Builds the dn chain for the specified user.
-     * 
-     * @param user  The current user
-     * @return      The dn chain for that user
+     *
+     * @param user The current user
+     * @return The dn chain for that user
      */
     public static List<String> getXProxiedEntitiesChain(final NiFiUser user) {
         // calculate the dn chain
@@ -83,13 +81,12 @@ public class ProxiedEntitiesUtils {
             // go to the next user in the chain
             chainedUser = chainedUser.getChain();
         } while (chainedUser != null);
-        
+
         return dnChain;
     }
 
     /**
-     * Formats the specified DN to be set as a HTTP header using well known
-     * conventions.
+     * Formats the specified DN to be set as a HTTP header using well known conventions.
      *
      * @param dn raw dn
      * @return the dn formatted as an HTTP header
@@ -115,7 +112,6 @@ public class ProxiedEntitiesUtils {
 //
 //        return dnList;
 //    }
-    
     public static List<String> buildProxyChain(final HttpServletRequest request, final String username) {
         String principal;
         if (username.startsWith("<") && username.endsWith(">")) {
@@ -123,12 +119,12 @@ public class ProxiedEntitiesUtils {
         } else {
             principal = formatProxyDn(username);
         }
-        
+
         // look for a proxied user
         if (StringUtils.isNotBlank(request.getHeader(PROXY_ENTITIES_CHAIN))) {
             principal = request.getHeader(PROXY_ENTITIES_CHAIN) + principal;
         }
-        
+
         // parse the proxy chain
         final List<String> proxyChain = new ArrayList<>();
         final Matcher rawProxyChainMatcher = proxyChainPattern.matcher(principal);
@@ -138,7 +134,7 @@ public class ProxiedEntitiesUtils {
 
         return proxyChain;
     }
-    
+
     public static String extractProxiedEntitiesChain(final HttpServletRequest request, final String username) {
         String principal;
         if (username.startsWith("<") && username.endsWith(">")) {
@@ -146,14 +142,14 @@ public class ProxiedEntitiesUtils {
         } else {
             principal = formatProxyDn(username);
         }
-        
+
         // look for a proxied user
         if (StringUtils.isNotBlank(request.getHeader(PROXY_ENTITIES_CHAIN))) {
             principal = request.getHeader(PROXY_ENTITIES_CHAIN) + principal;
         }
         return principal;
     }
-    
+
     public static void successfulAuthorization(HttpServletRequest request, HttpServletResponse response, Authentication authResult) {
         if (StringUtils.isNotBlank(request.getHeader(PROXY_ENTITIES_CHAIN))) {
             response.setHeader(PROXY_ENTITIES_ACCEPTED, Boolean.TRUE.toString());

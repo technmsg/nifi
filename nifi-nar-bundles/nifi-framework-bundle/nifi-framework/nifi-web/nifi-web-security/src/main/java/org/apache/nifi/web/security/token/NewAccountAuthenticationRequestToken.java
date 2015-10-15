@@ -19,13 +19,12 @@ package org.apache.nifi.web.security.token;
 import org.apache.nifi.web.security.user.NewAccountRequest;
 
 /**
- * This is an Authentication Token for a user that is request authentication in
- * order to submit a new account request.
+ * This is an Authentication Token for a user that is request authentication in order to submit a new account request.
  */
 public class NewAccountAuthenticationRequestToken extends NiFiAuthenticationRequestToken {
 
     final NewAccountRequest newAccountRequest;
-    
+
     public NewAccountAuthenticationRequestToken(final NewAccountRequest newAccountRequest) {
         super(newAccountRequest.getChain());
         this.newAccountRequest = newAccountRequest;
@@ -34,7 +33,7 @@ public class NewAccountAuthenticationRequestToken extends NiFiAuthenticationRequ
     public String getJustification() {
         return newAccountRequest.getJustification();
     }
-    
+
     public NewAccountRequest getNewAccountRequest() {
         return newAccountRequest;
     }

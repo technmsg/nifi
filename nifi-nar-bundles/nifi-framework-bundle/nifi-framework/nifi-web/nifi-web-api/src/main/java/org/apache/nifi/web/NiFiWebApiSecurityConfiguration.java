@@ -61,7 +61,7 @@ public class NiFiWebApiSecurityConfiguration extends WebSecurityConfigurerAdapte
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .rememberMe().disable()
-                .exceptionHandling()
+                    .exceptionHandling()
                     .authenticationEntryPoint(new NiFiAuthenticationEntryPoint())
                     .and()
                 .authorizeRequests()
@@ -78,28 +78,25 @@ public class NiFiWebApiSecurityConfiguration extends WebSecurityConfigurerAdapte
         http.addFilterBefore(buildX509Filter(), AnonymousAuthenticationFilter.class);
 
         // anonymous
-        final NiFiAnonymousUserFilter anonymousFilter = new NiFiAnonymousUserFilter();
-        anonymousFilter.setProperties(properties);
-        anonymousFilter.setUserService(userService);
-        http.anonymous().authenticationFilter(anonymousFilter);
+        http.anonymous().authenticationFilter(buildAnonymousFilter());
     }
 
-    @Bean 
+    @Bean
     @Override
     public AuthenticationManager authenticationManagerBean() throws Exception {
         // override xxxBean method so the authentication manager is available in app context (necessary for the method level security)
         return super.authenticationManagerBean();
     }
-    
+
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         // x509
         final AuthenticationProvider x509AuthenticationProvider = new NiFiAuthenticationProvider(new X509AuthenticationProvider(), userDetailsService);
-        
+
         auth
                 .authenticationProvider(x509AuthenticationProvider);
     }
-    
+
     private X509AuthenticationFilter buildX509Filter() throws Exception {
         final X509AuthenticationFilter x509Filter = new X509AuthenticationFilter();
         x509Filter.setPrincipalExtractor(new SubjectDnX509PrincipalExtractor());
@@ -108,7 +105,13 @@ public class NiFiWebApiSecurityConfiguration extends WebSecurityConfigurerAdapte
         x509Filter.setAuthenticationManager(authenticationManager());
         return x509Filter;
     }
-    
+
+    private AnonymousAuthenticationFilter buildAnonymousFilter() {
+        final NiFiAnonymousUserFilter anonymousFilter = new NiFiAnonymousUserFilter();
+        anonymousFilter.setUserService(userService);
+        return anonymousFilter;
+    }
+
     @Autowired
     public void setUserDetailsService(AuthenticationUserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
@@ -118,7 +121,7 @@ public class NiFiWebApiSecurityConfiguration extends WebSecurityConfigurerAdapte
     public void setUserService(UserService userService) {
         this.userService = userService;
     }
-    
+
     @Autowired
     public void setProperties(NiFiProperties properties) {
         this.properties = properties;

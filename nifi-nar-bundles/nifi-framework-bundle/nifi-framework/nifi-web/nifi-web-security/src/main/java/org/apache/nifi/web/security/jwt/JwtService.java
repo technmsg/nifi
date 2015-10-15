@@ -24,12 +24,12 @@ import org.springframework.security.core.Authentication;
  *
  */
 public class JwtService {
-    
+
     /**
      * Gets the Authentication by extracting a JWT token from the specified request.
-     * 
-     * @param request   Request to extract the token from
-     * @return          The user identifier from the token
+     *
+     * @param request Request to extract the token from
+     * @return The user identifier from the token
      */
     public String getAuthentication(final HttpServletRequest request) {
         // extract/verify token from incoming request
@@ -37,12 +37,12 @@ public class JwtService {
         // create authentication using user details
         return null;
     }
-    
+
     /**
      * Adds a token for the specified authentication in the specified response.
-     * 
-     * @param response          The response to add the token to
-     * @param authentication    The authentication to generate a token for
+     *
+     * @param response The response to add the token to
+     * @param authentication The authentication to generate a token for
      */
     public void addToken(final HttpServletResponse response, final Authentication authentication) {
         // create a token the specified authentication

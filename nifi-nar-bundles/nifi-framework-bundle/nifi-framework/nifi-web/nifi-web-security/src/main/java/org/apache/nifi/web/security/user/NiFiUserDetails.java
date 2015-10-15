@@ -41,7 +41,7 @@ public class NiFiUserDetails implements UserDetails {
     public NiFiUserDetails(NiFiUser user) {
         this.user = user;
     }
-    
+
     /**
      * Get the user for this UserDetails.
      *

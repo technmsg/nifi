@@ -37,7 +37,7 @@ public class FormAuthenticationFilter extends AbstractAuthenticationProcessingFi
     private static final Logger logger = LoggerFactory.getLogger(FormAuthenticationFilter.class);
 
     private JwtService jwtService;
-    
+
     public FormAuthenticationFilter(final String defaultFilterProcessesUrl) {
         super(defaultFilterProcessesUrl);
     }
@@ -50,7 +50,9 @@ public class FormAuthenticationFilter extends AbstractAuthenticationProcessingFi
     }
 
     @Override
-    protected void successfulAuthentication(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain, final Authentication authentication) throws IOException, ServletException {
+    protected void successfulAuthentication(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain, final Authentication authentication)
+            throws IOException, ServletException {
+
         // generate JWT for response
         jwtService.addToken(response, authentication);
     }

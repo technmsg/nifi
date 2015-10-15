@@ -16,7 +16,6 @@
  */
 package org.apache.nifi.web;
 
-import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,8 +32,6 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import javax.ws.rs.WebApplicationException;
 
@@ -155,7 +152,6 @@ import org.apache.nifi.web.util.SnippetUtils;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.nifi.admin.service.AdministrationException;
 import org.apache.nifi.components.PropertyDescriptor;
 import org.apache.nifi.components.Validator;
 import org.apache.nifi.controller.ReportingTaskNode;
@@ -1815,7 +1811,7 @@ public class StandardNiFiServiceFacade implements NiFiServiceFacade {
     @Override
     public UserDTO createUser() {
         NewAccountRequest newAccountRequest = NiFiUserUtils.getNewAccountRequest();
-        
+
         // log the new user account request
         logger.info("Requesting new user account for " + newAccountRequest.getUsername());
 
@@ -1828,7 +1824,7 @@ public class StandardNiFiServiceFacade implements NiFiServiceFacade {
         // create the pending user account
         return dtoFactory.createUserDTO(userService.createPendingUserAccount(newAccountRequest.getUsername(), justification));
     }
-    
+
     @Override
     public UserDTO updateUser(UserDTO userDto) {
         NiFiUser user;
@@ -3458,8 +3454,7 @@ public class StandardNiFiServiceFacade implements NiFiServiceFacade {
     }
 
     /**
-     * Utility method for extracting component counts from the specified group
-     * status.
+     * Utility method for extracting component counts from the specified group status.
      */
     private ProcessGroupCounts extractProcessGroupCounts(ProcessGroupStatus groupStatus) {
         int running = 0;

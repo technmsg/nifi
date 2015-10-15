@@ -20,15 +20,13 @@ import org.apache.nifi.web.security.user.NewAccountRequest;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 
 /**
- * This is an Authentication Token for a user that has been authenticated but is
- * not authorized to access the NiFi APIs. Typically, this authentication token is
- * used successfully when requesting a NiFi account. Requesting any other endpoint
- * would be rejected due to lack of roles.
+ * This is an Authentication Token for a user that has been authenticated but is not authorized to access the NiFi APIs. Typically, this authentication token is used successfully when requesting a
+ * NiFi account. Requesting any other endpoint would be rejected due to lack of roles.
  */
 public class NewAccountAuthenticationToken extends AbstractAuthenticationToken {
 
     final NewAccountRequest newAccountRequest;
-    
+
     public NewAccountAuthenticationToken(final NewAccountRequest newAccountRequest) {
         super(null);
         super.setAuthenticated(true);

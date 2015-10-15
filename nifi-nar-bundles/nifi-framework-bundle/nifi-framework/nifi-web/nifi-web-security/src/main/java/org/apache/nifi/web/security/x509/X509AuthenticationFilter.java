@@ -34,13 +34,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.preauth.x509.X509PrincipalExtractor;
 
 /**
- * Custom X509 filter that will inspect the HTTP headers for a proxied user
- * before extracting the user details from the client certificate.
+ * Custom X509 filter that will inspect the HTTP headers for a proxied user before extracting the user details from the client certificate.
  */
 public class X509AuthenticationFilter extends NiFiAuthenticationFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(X509AuthenticationFilter.class);
-    
+
     private X509PrincipalExtractor principalExtractor;
     private X509CertificateExtractor certificateExtractor;
     private OcspCertificateValidator certificateValidator;
@@ -88,7 +87,7 @@ public class X509AuthenticationFilter extends NiFiAuthenticationFilter {
             }
             return null;
         }
-        
+
         final List<String> proxyChain = ProxiedEntitiesUtils.buildProxyChain(request, principal);
         if (isNewAccountRequest(request)) {
             return new NewAccountAuthenticationRequestToken(new NewAccountRequest(proxyChain, getJustification(request)));
@@ -98,7 +97,6 @@ public class X509AuthenticationFilter extends NiFiAuthenticationFilter {
     }
 
     /* setters */
-
     public void setCertificateValidator(OcspCertificateValidator certificateValidator) {
         this.certificateValidator = certificateValidator;
     }

@@ -33,7 +33,7 @@ import org.springframework.security.core.Authentication;
 public class JwtAuthenticationFilter extends NiFiAuthenticationFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
-    
+
     private JwtService jwtService;
 
     @Override
@@ -42,7 +42,7 @@ public class JwtAuthenticationFilter extends NiFiAuthenticationFilter {
         if (principal == null) {
             return null;
         }
-        
+
         final List<String> proxyChain = ProxiedEntitiesUtils.buildProxyChain(request, principal);
         if (isNewAccountRequest(request)) {
             return new NewAccountAuthenticationRequestToken(new NewAccountRequest(proxyChain, getJustification(request)));

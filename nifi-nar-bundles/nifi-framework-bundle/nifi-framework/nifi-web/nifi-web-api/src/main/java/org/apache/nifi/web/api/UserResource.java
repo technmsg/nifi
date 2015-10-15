@@ -23,7 +23,6 @@ import com.wordnik.swagger.annotations.ApiParam;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 import com.wordnik.swagger.annotations.Authorization;
-import java.io.PrintWriter;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,14 +35,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HttpMethod;
-import static javax.ws.rs.HttpMethod.POST;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -103,25 +100,23 @@ public class UserResource extends ApplicationResource {
         if (!properties.getSupportNewAccountRequests()) {
             return Responses.notFound().entity("This NiFi does not support new account requests.").build();
         }
-        
+
         final NiFiUser nifiUser = NiFiUserUtils.getNiFiUser();
         if (nifiUser != null) {
             throw new IllegalArgumentException("User account already created " + nifiUser.getDn());
         }
-        
+
         // create an account request for the current user
         final UserDTO user = serviceFacade.createUser();
 
         final String uri = generateResourceUri("controller", "templates", user.getId());
         return generateCreatedResponse(URI.create(uri), "Not authorized. User account created. Authorization pending.").build();
     }
-    
+
     /**
      * Gets all users that are registered within this Controller.
      *
-     * @param clientId Optional client id. If the client id is not specified, a
-     * new one will be generated. This value (whether specified or generated) is
-     * included in the response.
+     * @param clientId Optional client id. If the client id is not specified, a new one will be generated. This value (whether specified or generated) is included in the response.
      * @param grouped Whether to return the users in their groups.
      * @return A usersEntity.
      */
@@ -177,9 +172,7 @@ public class UserResource extends ApplicationResource {
     /**
      * Gets the details for the specified user.
      *
-     * @param clientId Optional client id. If the client id is not specified, a
-     * new one will be generated. This value (whether specified or generated) is
-     * included in the response.
+     * @param clientId Optional client id. If the client id is not specified, a new one will be generated. This value (whether specified or generated) is included in the response.
      * @param id The user id.
      * @return A userEntity.
      */
@@ -348,12 +341,9 @@ public class UserResource extends ApplicationResource {
      * Updates the specified user.
      *
      * @param httpServletRequest request
-     * @param clientId Optional client id. If the client id is not specified, a
-     * new one will be generated. This value (whether specified or generated) is
-     * included in the response.
+     * @param clientId Optional client id. If the client id is not specified, a new one will be generated. This value (whether specified or generated) is included in the response.
      * @param id The id of the user to update.
-     * @param rawAuthorities Array of authorities to assign to the specified
-     * user.
+     * @param rawAuthorities Array of authorities to assign to the specified user.
      * @param status The status of the specified users account.
      * @param formParams form params
      * @return A userEntity
@@ -524,9 +514,7 @@ public class UserResource extends ApplicationResource {
      *
      * @param httpServletRequest request
      * @param id The user id
-     * @param clientId Optional client id. If the client id is not specified, a
-     * new one will be generated. This value (whether specified or generated) is
-     * included in the response.
+     * @param clientId Optional client id. If the client id is not specified, a new one will be generated. This value (whether specified or generated) is included in the response.
      * @return A userEntity.
      */
     @DELETE

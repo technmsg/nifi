@@ -22,7 +22,6 @@ import org.apache.nifi.admin.service.AdministrationException;
 import org.apache.nifi.admin.service.UserService;
 import org.apache.nifi.user.NiFiUser;
 import org.apache.nifi.web.security.user.NiFiUserDetails;
-import org.apache.nifi.util.NiFiProperties;
 import org.apache.nifi.web.security.token.NiFiAuthorizationToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,8 +29,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 
 /**
- * Custom AnonymouseAuthenticationFilter used to grant additional authorities
- * depending on the current operating mode.
+ * Custom AnonymouseAuthenticationFilter used to grant additional authorities depending on the current operating mode.
  */
 public class NiFiAnonymousUserFilter extends AnonymousAuthenticationFilter {
 
@@ -39,7 +37,6 @@ public class NiFiAnonymousUserFilter extends AnonymousAuthenticationFilter {
 
     private static final String ANONYMOUS_KEY = "anonymousNifiKey";
 
-    private NiFiProperties properties;
     private UserService userService;
 
     public NiFiAnonymousUserFilter() {
@@ -50,35 +47,26 @@ public class NiFiAnonymousUserFilter extends AnonymousAuthenticationFilter {
     protected Authentication createAuthentication(HttpServletRequest request) {
         Authentication authentication = null;
 
-        // only support anonymous when the request is non-secure or one way ssl
-//        if (!request.isSecure() || !properties.getNeedClientAuth()) {
-        if (true) {
-            try {
-                // load the anonymous user from the database
-                NiFiUser user = userService.getUserByDn(NiFiUser.ANONYMOUS_USER_DN);
-                NiFiUserDetails userDetails = new NiFiUserDetails(user);
+        try {
+            // load the anonymous user from the database
+            NiFiUser user = userService.getUserByDn(NiFiUser.ANONYMOUS_USER_DN);
+            NiFiUserDetails userDetails = new NiFiUserDetails(user);
 
-                // get the granted authorities
-                authentication = new NiFiAuthorizationToken(userDetails);
-            } catch (AdministrationException ase) {
-                // record the issue
-                anonymousUserFilterLogger.warn("Unable to load anonymous user from accounts database: " + ase.getMessage());
-                if (anonymousUserFilterLogger.isDebugEnabled()) {
-                    anonymousUserFilterLogger.warn(StringUtils.EMPTY, ase);
-                }
+            // get the granted authorities
+            authentication = new NiFiAuthorizationToken(userDetails);
+        } catch (AdministrationException ase) {
+            // record the issue
+            anonymousUserFilterLogger.warn("Unable to load anonymous user from accounts database: " + ase.getMessage());
+            if (anonymousUserFilterLogger.isDebugEnabled()) {
+                anonymousUserFilterLogger.warn(StringUtils.EMPTY, ase);
             }
         }
         return authentication;
     }
 
     /* setters */
-
     public void setUserService(UserService userService) {
         this.userService = userService;
-    }
-
-    public void setProperties(NiFiProperties properties) {
-        this.properties = properties;
     }
 
 }

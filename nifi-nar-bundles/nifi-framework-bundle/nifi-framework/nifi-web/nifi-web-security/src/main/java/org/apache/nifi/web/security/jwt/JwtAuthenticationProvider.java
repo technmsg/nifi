@@ -38,10 +38,10 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
             return null;
         }
     }
-    
+
     @Override
     public boolean supports(Class<?> authentication) {
         return NiFiAuthenticationRequestToken.class.isAssignableFrom(authentication);
     }
-    
+
 }

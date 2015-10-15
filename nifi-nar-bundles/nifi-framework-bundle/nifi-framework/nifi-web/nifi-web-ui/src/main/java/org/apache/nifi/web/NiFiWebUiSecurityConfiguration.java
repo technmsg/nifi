@@ -39,7 +39,7 @@ public class NiFiWebUiSecurityConfiguration extends WebSecurityConfigurerAdapter
     }
 
     private JwtService jwtService;
-    
+
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
         http
@@ -47,7 +47,7 @@ public class NiFiWebUiSecurityConfiguration extends WebSecurityConfigurerAdapter
                 .sessionManagement()
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
     }
-    
+
     private FormAuthenticationFilter buildFormLoginFilter() throws Exception {
         final FormAuthenticationFilter loginFilter = new FormAuthenticationFilter("/token");
         loginFilter.setJwtService(jwtService);
@@ -65,5 +65,5 @@ public class NiFiWebUiSecurityConfiguration extends WebSecurityConfigurerAdapter
     public void setJwtService(JwtService jwtService) {
         this.jwtService = jwtService;
     }
-    
+
 }

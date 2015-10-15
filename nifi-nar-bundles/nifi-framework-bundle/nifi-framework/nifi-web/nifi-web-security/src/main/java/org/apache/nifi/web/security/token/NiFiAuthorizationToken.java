@@ -20,13 +20,12 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 
 /**
- * An authentication token that represents an Authenticated and Authorized user
- * of the NiFi Apis. The authorities are based off the specified UserDetails.
+ * An authentication token that represents an Authenticated and Authorized user of the NiFi Apis. The authorities are based off the specified UserDetails.
  */
 public class NiFiAuthorizationToken extends AbstractAuthenticationToken {
 
     final UserDetails nifiUserDetails;
-    
+
     public NiFiAuthorizationToken(final UserDetails nifiUserDetails) {
         super(nifiUserDetails.getAuthorities());
         super.setAuthenticated(true);

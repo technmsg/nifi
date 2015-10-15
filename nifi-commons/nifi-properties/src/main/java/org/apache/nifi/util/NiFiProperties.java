@@ -25,10 +25,14 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -130,7 +134,7 @@ public class NiFiProperties extends Properties {
     public static final String SECURITY_CLUSTER_AUTHORITY_PROVIDER_THREADS = "nifi.security.cluster.authority.provider.threads";
     public static final String SECURITY_USER_CREDENTIAL_CACHE_DURATION = "nifi.security.user.credential.cache.duration";
     public static final String SECURITY_SUPPORT_NEW_ACCOUNT_REQUESTS = "nifi.security.support.new.account.requests";
-    public static final String SECURITY_DEFAULT_USER_ROLES = "nifi.security.default.user.roles";
+    public static final String SECURITY_ANONYMOUS_AUTHORITIES = "nifi.security.anonymous.authorities";
     public static final String SECURITY_OCSP_RESPONDER_URL = "nifi.security.ocsp.responder.url";
     public static final String SECURITY_OCSP_RESPONDER_CERTIFICATE = "nifi.security.ocsp.responder.certificate";
 
@@ -234,8 +238,7 @@ public class NiFiProperties extends Properties {
     }
 
     /**
-     * This is the method through which the NiFiProperties object should be
-     * obtained.
+     * This is the method through which the NiFiProperties object should be obtained.
      *
      * @return the NiFiProperties object to use
      * @throws RuntimeException if unable to load properties file
@@ -424,8 +427,7 @@ public class NiFiProperties extends Properties {
     }
 
     /**
-     * Returns whether the processors should be started automatically when the
-     * application loads.
+     * Returns whether the processors should be started automatically when the application loads.
      *
      * @return Whether to auto start the processors or not
      */
@@ -436,8 +438,7 @@ public class NiFiProperties extends Properties {
     }
 
     /**
-     * Returns the number of partitions that should be used for the FlowFile
-     * Repository
+     * Returns the number of partitions that should be used for the FlowFile Repository
      *
      * @return the number of partitions
      */
@@ -448,8 +449,7 @@ public class NiFiProperties extends Properties {
     }
 
     /**
-     * Returns the number of milliseconds between FlowFileRepository
-     * checkpointing
+     * Returns the number of milliseconds between FlowFileRepository checkpointing
      *
      * @return the number of milliseconds between checkpoint events
      */
@@ -508,6 +508,19 @@ public class NiFiProperties extends Properties {
             shouldSupport = false;
         }
         return shouldSupport;
+    }
+
+    public Set<String> getAnonymousAuthorities() {
+        final Set<String> authorities;
+
+        final String rawAnonymousAuthorities = getProperty(SECURITY_ANONYMOUS_AUTHORITIES);
+        if (!StringUtils.isEmpty(rawAnonymousAuthorities)) {
+            authorities = new HashSet<>(Arrays.asList(rawAnonymousAuthorities.split(",")));
+        } else {
+            authorities = Collections.EMPTY_SET;
+        }
+
+        return authorities;
     }
 
     // getters for web properties //
@@ -851,8 +864,7 @@ public class NiFiProperties extends Properties {
     }
 
     /**
-     * Returns the database repository path. It simply returns the value
-     * configured. No directories will be created as a result of this operation.
+     * Returns the database repository path. It simply returns the value configured. No directories will be created as a result of this operation.
      *
      * @return database repository path
      * @throws InvalidPathException If the configured path is invalid
@@ -862,8 +874,7 @@ public class NiFiProperties extends Properties {
     }
 
     /**
-     * Returns the flow file repository path. It simply returns the value
-     * configured. No directories will be created as a result of this operation.
+     * Returns the flow file repository path. It simply returns the value configured. No directories will be created as a result of this operation.
      *
      * @return database repository path
      * @throws InvalidPathException If the configured path is invalid
@@ -873,10 +884,8 @@ public class NiFiProperties extends Properties {
     }
 
     /**
-     * Returns the content repository paths. This method returns a mapping of
-     * file repository name to file repository paths. It simply returns the
-     * values configured. No directories will be created as a result of this
-     * operation.
+     * Returns the content repository paths. This method returns a mapping of file repository name to file repository paths. It simply returns the values configured. No directories will be created as
+     * a result of this operation.
      *
      * @return file repositories paths
      * @throws InvalidPathException If any of the configured paths are invalid
@@ -900,10 +909,8 @@ public class NiFiProperties extends Properties {
     }
 
     /**
-     * Returns the provenance repository paths. This method returns a mapping of
-     * file repository name to file repository paths. It simply returns the
-     * values configured. No directories will be created as a result of this
-     * operation.
+     * Returns the provenance repository paths. This method returns a mapping of file repository name to file repository paths. It simply returns the values configured. No directories will be created
+     * as a result of this operation.
      *
      * @return the name and paths of all provenance repository locations
      */

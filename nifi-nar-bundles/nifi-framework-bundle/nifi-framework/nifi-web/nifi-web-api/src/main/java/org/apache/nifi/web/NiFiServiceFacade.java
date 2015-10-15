@@ -1237,10 +1237,11 @@ public interface NiFiServiceFacade {
 
     /**
      * Creates a new account request.
+     *
      * @return user
      */
     UserDTO createUser();
-    
+
     /**
      * Updates the specified user accordingly.
      *
